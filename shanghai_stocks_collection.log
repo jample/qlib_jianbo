@@ -1,0 +1,15 @@
+2025-09-08 16:53:30,159 - INFO - Shanghai Stock Collector initialized
+2025-09-08 16:53:30,160 - INFO - Data directory: qlib_shanghai_data
+2025-09-08 16:53:30,160 - INFO - Date range: 20241201 to 20241210
+2025-09-08 16:53:30,160 - INFO - ============================================================
+2025-09-08 16:53:30,160 - INFO - SHANGHAI STOCK DATA COLLECTION PIPELINE
+2025-09-08 16:53:30,160 - INFO - ============================================================
+2025-09-08 16:53:30,160 - INFO - Step 1: Collecting raw data...
+2025-09-08 16:53:30,160 - INFO - Fetching Shanghai stock list...
+2025-09-08 16:53:36,629 - INFO - Found 2283 Shanghai stocks
+2025-09-08 16:53:36,629 - INFO - Sample Shanghai stocks: ['600000', '600004', '600006', '600007', '600008', '600009', '600010', '600011', '600012', '600015']
+2025-09-08 16:53:36,630 - INFO - Limited to first 5 stocks
+2025-09-08 16:53:36,630 - INFO - Starting data collection for 5 Shanghai stocks
+2025-09-08 16:53:36,630 - ERROR - Error during data collection: 'AkShareCollectorCN1d' object has no attribute 'data_type'
+2025-09-08 16:53:36,630 - ERROR - Data collection failed!
+2025-09-08 16:53:36,630 - ERROR - Shanghai stock data collection failed!

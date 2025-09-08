@@ -1,0 +1,54 @@
+2025-09-08 17:00:13,788 - INFO - ================================================================================
+2025-09-08 17:00:13,788 - INFO - FULL SHANGHAI STOCK MARKET DATA COLLECTION
+2025-09-08 17:00:13,788 - INFO - ================================================================================
+2025-09-08 17:00:13,788 - INFO - Start date: 20241101
+2025-09-08 17:00:13,788 - INFO - End date: 20241130
+2025-09-08 17:00:13,788 - INFO - Data directory: ./qlib_shanghai_full_data
+2025-09-08 17:00:13,788 - INFO - Delay: 1.5 seconds
+2025-09-08 17:00:13,788 - INFO - Max workers: 4
+2025-09-08 17:00:13,788 - INFO - Test mode: True
+2025-09-08 17:00:13,965 - INFO - NumExpr defaulting to 10 threads.
+2025-09-08 17:00:14,714 - INFO - Shanghai Direct Collector initialized
+2025-09-08 17:00:14,714 - INFO - Data directory: qlib_shanghai_full_data
+2025-09-08 17:00:14,714 - INFO - Date range: 20241101 to 20241130
+2025-09-08 17:00:14,714 - INFO - Running in TEST MODE - collecting only 10 stocks
+2025-09-08 17:00:14,714 - INFO - ============================================================
+2025-09-08 17:00:14,714 - INFO - SHANGHAI STOCK DIRECT COLLECTION
+2025-09-08 17:00:14,714 - INFO - ============================================================
+2025-09-08 17:00:14,714 - INFO - Step 1: Collecting stock data...
+2025-09-08 17:00:14,714 - INFO - Fetching Shanghai stock list...
+2025-09-08 17:00:21,346 - INFO - Found 2283 Shanghai stocks
+2025-09-08 17:00:21,346 - INFO - Limited to first 10 stocks
+2025-09-08 17:00:21,346 - INFO - Starting collection for 10 stocks...
+2025-09-08 17:00:21,346 - INFO - Processing 1/10: 600000
+2025-09-08 17:00:23,001 - INFO - Processing 2/10: 600004
+2025-09-08 17:00:24,628 - INFO - Processing 3/10: 600006
+2025-09-08 17:00:26,279 - INFO - Processing 4/10: 600007
+2025-09-08 17:00:27,930 - INFO - Processing 5/10: 600008
+2025-09-08 17:00:29,612 - INFO - Processing 6/10: 600009
+2025-09-08 17:00:31,258 - INFO - Processing 7/10: 600010
+2025-09-08 17:00:32,901 - INFO - Processing 8/10: 600011
+2025-09-08 17:00:34,542 - INFO - Processing 9/10: 600012
+2025-09-08 17:00:36,205 - INFO - Processing 10/10: 600015
+2025-09-08 17:00:37,858 - INFO - Collection completed: 10 successful, 0 failed
+2025-09-08 17:00:37,859 - INFO - Step 2: Converting to Qlib format...
+2025-09-08 17:00:37,859 - INFO - Converting to Qlib binary format...
+2025-09-08 17:00:38,291 - INFO - NumExpr defaulting to 10 threads.
+2025-09-08 17:00:38,297 - INFO - NumExpr defaulting to 10 threads.
+2025-09-08 17:00:38,307 - INFO - NumExpr defaulting to 10 threads.
+2025-09-08 17:00:38,317 - INFO - NumExpr defaulting to 10 threads.
+2025-09-08 17:00:39,103 - INFO - NumExpr defaulting to 10 threads.
+2025-09-08 17:00:39,105 - INFO - NumExpr defaulting to 10 threads.
+2025-09-08 17:00:39,110 - INFO - NumExpr defaulting to 10 threads.
+2025-09-08 17:00:39,112 - INFO - NumExpr defaulting to 10 threads.
+2025-09-08 17:00:39,522 - INFO - Qlib binary data created at: qlib_shanghai_full_data/qlib_data
+2025-09-08 17:00:39,522 - INFO - ============================================================
+2025-09-08 17:00:39,522 - INFO - COLLECTION COMPLETED SUCCESSFULLY!
+2025-09-08 17:00:39,522 - INFO - ============================================================
+2025-09-08 17:00:39,522 - INFO - Qlib data available at: qlib_shanghai_full_data/qlib_data
+2025-09-08 17:00:39,522 - INFO - You can now use this data with Qlib by setting:
+2025-09-08 17:00:39,522 - INFO - qlib.init(provider_uri='qlib_shanghai_full_data/qlib_data', region='cn')
+2025-09-08 17:00:39,522 - INFO - ================================================================================
+2025-09-08 17:00:39,522 - INFO - COLLECTION COMPLETED SUCCESSFULLY!
+2025-09-08 17:00:39,522 - INFO - ================================================================================
+2025-09-08 17:00:39,522 - INFO - Testing the collected data...

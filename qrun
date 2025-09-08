@@ -1,0 +1,25 @@
+#!/opt/homebrew/Caskroom/miniconda/base/envs/qlibbase/bin/python
+"""
+QLib Run Command - Local Development Version
+
+This script provides the qrun functionality using your local qlib development code.
+Usage: ./qrun <config_path> [options]
+"""
+import sys
+import os
+
+# Add the current qlib project to Python path (highest priority)
+project_root = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, project_root)
+
+# Import and run the qrun functionality
+try:
+    from qlib.cli.run import run
+    import fire
+except ImportError as e:
+    print(f"Error importing required modules: {e}")
+    print("Make sure you have all dependencies installed in your conda environment.")
+    sys.exit(1)
+
+if __name__ == "__main__":
+    fire.Fire(run)

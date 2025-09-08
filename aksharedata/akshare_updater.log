@@ -1,0 +1,17 @@
+2025-09-04 16:45:39,999 - INFO - AkShare Data Updater initialized
+2025-09-04 16:45:39,999 - INFO - AkShare version: 1.17.44
+2025-09-04 16:45:39,999 - INFO - Data directory: akshare_data
+2025-09-04 16:45:39,999 - INFO - Starting daily update...
+2025-09-04 16:45:41,156 - INFO - Collected 4 records for 000002
+2025-09-04 16:45:41,161 - INFO - Collected 4 records for 000001
+2025-09-04 16:45:41,161 - INFO - Successfully collected data for 2 symbols
+2025-09-04 16:45:41,164 - INFO - Saved 000002_20250904.csv
+2025-09-04 16:45:41,165 - INFO - Saved 000001_20250904.csv
+2025-09-04 16:45:46,372 - ERROR - Error collecting CSI300: 'NoneType' object is not subscriptable
+2025-09-04 16:45:48,063 - ERROR - Error collecting CSI500: 'NoneType' object is not subscriptable
+2025-09-04 16:45:49,753 - ERROR - Error collecting SSE50: 'NoneType' object is not subscriptable
+2025-09-04 16:45:51,487 - ERROR - Error collecting ChiNext: 'NoneType' object is not subscriptable
+2025-09-04 16:45:52,490 - ERROR - Error collecting fund 015198: fund_open_fund_info_em() got an unexpected keyword argument 'fund'
+2025-09-04 16:45:53,496 - ERROR - Error collecting fund 110022: fund_open_fund_info_em() got an unexpected keyword argument 'fund'
+2025-09-04 16:45:54,502 - ERROR - Error collecting fund 161725: fund_open_fund_info_em() got an unexpected keyword argument 'fund'
+2025-09-04 16:45:54,502 - INFO - Daily update completed
