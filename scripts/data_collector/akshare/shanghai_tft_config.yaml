@@ -1,0 +1,254 @@
+# Shanghai Stock TFT Configuration
+# Configuration file for Temporal Fusion Transformer training on Shanghai stock market data
+
+qlib_init:
+  provider_uri: "scripts/data_collector/akshare/qlib_data"
+  region: cn
+
+market: shanghai_stocks
+benchmark: SH000001
+
+# Data extraction and preparation configuration
+data_config:
+  start_time: "2020-01-01"
+  end_time: "2023-12-31"
+  symbols: ["600000", "600036", "600519", "600887", "601318"]  # Sample Shanghai stocks
+  min_periods: 100  # Minimum trading days required per stock
+  exchange_filter: "shanghai"
+  data_type: "stock"
+
+# Model configuration
+model_config:
+  dataset: "Shanghai_Alpha158"
+  label_shift: 5  # 5-day forward prediction horizon
+  model_folder: "shanghai_tft_models"
+  gpu_id: 0
+  
+# Training/validation/test split configuration
+training_config:
+  segments:
+    train: ["2020-01-01", "2022-12-31"]  # 3 years training
+    valid: ["2023-01-01", "2023-06-30"]  # 6 months validation
+    test: ["2023-07-01", "2023-12-31"]   # 6 months testing
+
+# TFT hyperparameters (optimized for Shanghai stock data)
+tft_hyperparameters:
+  # Model architecture
+  dropout_rate: 0.4
+  hidden_layer_size: 160
+  num_heads: 1
+  stack_size: 1
+  
+  # Training parameters
+  learning_rate: 0.0001
+  minibatch_size: 128
+  max_gradient_norm: 0.0135
+  num_epochs: 100
+  early_stopping_patience: 10
+  multiprocessing_workers: 4
+  
+  # Time series parameters
+  total_time_steps: 12  # 6 historical + 6 future
+  num_encoder_steps: 6  # Historical lookback window
+
+# Feature configuration for Shanghai stocks
+feature_config:
+  # Alpha158 features optimized for TFT
+  selected_features:
+    # Price position features
+    - "KLEN"   # (close - low) / (high - low)
+    - "KLOW"   # (close - low) / (open - low)  
+    - "KMID"   # (close - open) / (high - low)
+    - "KUP"    # (high - close) / (high - open)
+    
+    # Volatility features
+    - "STD5"   # 5-day standard deviation
+    - "STD10"  # 10-day standard deviation
+    - "STD20"  # 20-day standard deviation
+    
+    # Momentum features
+    - "ROC5"   # 5-day rate of change
+    - "ROC10"  # 10-day rate of change
+    - "ROC20"  # 20-day rate of change
+    
+    # Moving average features
+    - "MA5"    # 5-day moving average
+    - "MA10"   # 10-day moving average
+    - "MA20"   # 20-day moving average
+    
+    # Extrema features
+    - "MAX5"   # 5-day maximum
+    - "MAX10"  # 10-day maximum
+    - "MIN5"   # 5-day minimum
+    - "MIN10"  # 10-day minimum
+    
+    # Rank features
+    - "RANK5"  # 5-day rank
+    - "RANK10" # 10-day rank
+    
+    # Relative strength features
+    - "RSV5"   # 5-day relative strength value
+    - "RSV10"  # 10-day relative strength value
+    
+    # Beta and correlation features
+    - "BETA5"  # 5-day beta
+    - "BETA10" # 10-day beta
+    - "RSQR5"  # 5-day R-squared
+    - "RSQR10" # 10-day R-squared
+    - "RSQR20" # 20-day R-squared
+
+  # Input type mapping for TFT
+  input_types:
+    static_inputs:
+      - "const"  # Constant feature
+    
+    known_inputs:
+      - "day_of_week"  # Day of week (0-6)
+      - "month"        # Month (1-12)
+      - "year"         # Year
+    
+    observed_inputs:
+      # All Alpha158 features are observed inputs
+      - "KLEN"
+      - "KLOW" 
+      - "KMID"
+      - "KUP"
+      - "STD5"
+      - "STD10"
+      - "STD20"
+      - "ROC5"
+      - "ROC10"
+      - "ROC20"
+      - "MA5"
+      - "MA10"
+      - "MA20"
+      - "MAX5"
+      - "MAX10"
+      - "MIN5"
+      - "MIN10"
+      - "RANK5"
+      - "RANK10"
+      - "RSV5"
+      - "RSV10"
+      - "BETA5"
+      - "BETA10"
+      - "RSQR5"
+      - "RSQR10"
+      - "RSQR20"
+
+# Evaluation configuration
+evaluation_config:
+  metrics:
+    - "IC"          # Information Coefficient
+    - "RankIC"      # Rank Information Coefficient
+    - "MSE"         # Mean Squared Error
+    - "MAE"         # Mean Absolute Error
+    - "Sharpe"      # Sharpe Ratio
+  
+  quantile_levels: [0.1, 0.5, 0.9]  # P10, P50, P90 predictions
+  
+  # Backtesting configuration
+  backtest:
+    start_time: "2023-07-01"
+    end_time: "2023-12-31"
+    account: 100000000  # 100M initial capital
+    benchmark: "SH000001"
+    
+    # Trading parameters
+    exchange_kwargs:
+      limit_threshold: 0.095  # 9.5% daily limit
+      deal_price: "close"
+      open_cost: 0.0005      # 0.05% transaction cost
+      close_cost: 0.0015     # 0.15% transaction cost
+      min_cost: 5            # Minimum transaction cost
+
+# Output configuration
+output_config:
+  save_predictions: true
+  save_attention_weights: true
+  save_model_checkpoints: true
+  generate_reports: true
+  
+  # Report types to generate
+  reports:
+    - "performance_summary"
+    - "feature_importance"
+    - "attention_analysis"
+    - "prediction_distribution"
+    - "temporal_patterns"
+
+# System configuration
+system_config:
+  # GPU configuration
+  gpu_memory_growth: true
+  allow_soft_placement: true
+  
+  # Logging configuration
+  log_level: "INFO"
+  log_file: "shanghai_tft_training.log"
+  
+  # Checkpoint configuration
+  save_checkpoints: true
+  checkpoint_frequency: 10  # Save every 10 epochs
+  max_checkpoints_to_keep: 5
+
+# Advanced configuration
+advanced_config:
+  # Data preprocessing
+  outlier_removal:
+    enabled: true
+    method: "iqr"  # Inter-quartile range
+    threshold: 3.0
+  
+  # Feature engineering
+  feature_engineering:
+    enabled: true
+    add_technical_indicators: true
+    add_market_regime_features: false
+  
+  # Model ensemble
+  ensemble:
+    enabled: false
+    num_models: 3
+    ensemble_method: "average"
+  
+  # Hyperparameter optimization
+  hyperopt:
+    enabled: false
+    num_trials: 50
+    optimization_metric: "IC"
+    
+    # Parameter search space
+    search_space:
+      dropout_rate: [0.1, 0.2, 0.3, 0.4, 0.5]
+      hidden_layer_size: [80, 120, 160, 200, 240]
+      learning_rate: [0.0001, 0.0005, 0.001, 0.005]
+      num_heads: [1, 2, 4]
+      stack_size: [1, 2, 3]
+
+# Environment requirements
+requirements:
+  python_version: "3.6-3.7"  # TFT limitation
+  tensorflow_version: "1.15.0"
+  cuda_version: "10.0"
+  cudnn_required: true
+  gpu_required: true
+  
+  # Minimum hardware requirements
+  min_gpu_memory: "4GB"
+  min_ram: "8GB"
+  min_storage: "10GB"
+
+# Usage examples
+usage_examples:
+  basic_training: |
+    python shanghai_tft_runner.py --symbols 600000 600036 600519
+  
+  custom_dates: |
+    python shanghai_tft_runner.py --start-date 2021-01-01 --end-date 2023-12-31
+  
+  specific_gpu: |
+    python shanghai_tft_runner.py --gpu-id 1 --model-folder custom_models
+  
+  config_file: |
+    python shanghai_tft_runner.py --config shanghai_tft_config.yaml

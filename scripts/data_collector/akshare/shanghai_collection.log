@@ -1,0 +1,55 @@
+nohup: ignoring input
+2025-09-16 14:53:40.051 | INFO     | __main__:download_data:1090 - ================================================================================
+2025-09-16 14:53:40.051 | INFO     | __main__:download_data:1091 - AKSHARE DATA COLLECTOR - RATE LIMITED VERSION
+2025-09-16 14:53:40.051 | INFO     | __main__:download_data:1092 - ================================================================================
+2025-09-16 14:53:40.051 | INFO     | __main__:download_data:1093 - Settings:
+2025-09-16 14:53:40.051 | INFO     | __main__:download_data:1094 -   - Single thread download only
+2025-09-16 14:53:40.051 | INFO     | __main__:download_data:1095 -   - Minimum 12 seconds between requests
+2025-09-16 14:53:40.051 | INFO     | __main__:download_data:1096 -   - Data type: stock
+2025-09-16 14:53:40.052 | INFO     | __main__:download_data:1097 -   - Shanghai only: True
+2025-09-16 14:53:40.052 | INFO     | __main__:download_data:1098 -   - Date range: 2024-01-01 to 2024-12-31
+2025-09-16 14:53:40.052 | INFO     | __main__:download_data:1101 - ================================================================================
+2025-09-16 14:53:40.052 | INFO     | __main__:__init__:109 - AkShare collector initialized for stock data
+2025-09-16 14:53:40.052 | INFO     | __main__:__init__:110 - Rate limiting: 12 seconds delay between requests
+2025-09-16 14:53:40.052 | INFO     | __main__:__init__:111 - Data will be saved to: /root/mycode/qlibjianbo/scripts/data_collector/akshare/source
+2025-09-16 14:53:40.052 | INFO     | __main__:__init__:114 - Shanghai Stock Exchange filter enabled
+2025-09-16 14:53:40.062 | INFO     | __main__:_get_shanghai_stock_list:904 - Getting Shanghai stock symbols from cache...
+2025-09-16 14:53:40.075 | INFO     | __main__:_is_cache_valid:742 - Cache last updated: 2025-09-16, age: 0 days
+2025-09-16 14:53:40.081 | INFO     | __main__:_get_cached_shanghai_stocks:886 - Retrieved 2419 Shanghai stocks from cache (updated: 2025-09-16 11:43:27.822298)
+2025-09-16 14:53:40.081 | INFO     | __main__:_get_cached_shanghai_stocks:887 - Sample cached stocks: ['600000', '600001', '600002', '600003', '600004', '600005', '600006', '600007', '600008', '600009']
+2025-09-16 14:53:40.081 | INFO     | __main__:_get_cached_shanghai_stocks:894 -   600xxx stocks: 875
+2025-09-16 14:53:40.081 | INFO     | __main__:_get_cached_shanghai_stocks:894 -   601xxx stocks: 229
+2025-09-16 14:53:40.081 | INFO     | __main__:_get_cached_shanghai_stocks:894 -   603xxx stocks: 611
+2025-09-16 14:53:40.081 | INFO     | __main__:_get_cached_shanghai_stocks:894 -   605xxx stocks: 113
+2025-09-16 14:53:40.081 | INFO     | __main__:_get_cached_shanghai_stocks:894 -   688xxx stocks: 590
+2025-09-16 14:53:40.082 | INFO     | __main__:_get_cached_shanghai_stocks:894 -   689xxx stocks: 1
+2025-09-16 14:53:40.085 | INFO     | __main__:__init__:127 - Total stocks to download: 2419
+2025-09-16 14:53:40.086 | INFO     | __main__:collector_data:357 - ================================================================================
+2025-09-16 14:53:40.086 | INFO     | __main__:collector_data:358 - SHANGHAI STOCK DATA COLLECTION STARTED
+2025-09-16 14:53:40.086 | INFO     | __main__:collector_data:359 - ================================================================================
+2025-09-16 14:53:40.086 | INFO     | __main__:collector_data:360 - Total stocks to download: 2419
+2025-09-16 14:53:40.086 | INFO     | __main__:collector_data:361 - Data storage path: /root/mycode/qlibjianbo/scripts/data_collector/akshare/source
+2025-09-16 14:53:40.086 | INFO     | __main__:collector_data:362 - Date range: 2024-01-01 to 2024-12-31
+2025-09-16 14:53:40.086 | INFO     | __main__:collector_data:363 - Rate limiting: 1 request per 12 seconds
+2025-09-16 14:53:40.086 | INFO     | __main__:collector_data:364 - Incremental mode: Disabled
+2025-09-16 14:53:40.097 | INFO     | __main__:collector_data:370 - ================================================================================
+2025-09-16 14:53:40.097 | INFO     | __main__:collector_data:382 - Estimated completion time: 483.8 minutes (8.1 hours)
+
+Proceed with downloading 2419 stocks? [y/N]: Traceback (most recent call last):
+  File "/root/mycode/qlibjianbo/scripts/data_collector/akshare/collector_standalone.py", line 1500, in <module>
+    fire.Fire(Run)
+  File "/root/miniconda3/envs/qlib/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+    component_trace = _Fire(component, args, parsed_flag_args, context, name)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/envs/qlib/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+    component, remaining_args = _CallAndUpdateTrace(
+                                ^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/envs/qlib/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+    component = fn(*varargs, **kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/mycode/qlibjianbo/scripts/data_collector/akshare/collector_standalone.py", line 1118, in download_data
+    collector.collector_data()
+  File "/root/mycode/qlibjianbo/scripts/data_collector/akshare/collector_standalone.py", line 386, in collector_data
+    response = input(f"\nProceed with downloading {len(self.instrument_list)} stocks? [y/N]: ").strip().lower()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 9] Bad file descriptor

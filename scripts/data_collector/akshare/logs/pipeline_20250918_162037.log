@@ -1,0 +1,132 @@
+2025-09-18 16:20:37 | INFO     | main_pipeline:setup_logging:121 - Logging setup completed. Log file: scripts/data_collector/akshare/logs/pipeline_20250918_162037.log
+2025-09-18 16:20:37 | INFO     | duckdb_extractor:__init__:63 - Initialized DuckDB extractor: data_type=stock, exchange=shanghai, interval=1d
+2025-09-18 16:20:37 | INFO     | duckdb_extractor:__init__:64 - Using tables: stock_data, stock_update_metadata, shanghai_stocks
+2025-09-18 16:20:37 | INFO     | binary_converter:__init__:45 - Initialized binary converter with output dir: scripts/data_collector/akshare/qlib_data
+2025-09-18 16:20:37 | INFO     | data_initializer:__init__:35 - Initialized data initializer with min_trading_days=100, min_price=0.01
+2025-09-18 16:20:37 | INFO     | alpha158_calculator:__init__:27 - Initialized Alpha 158 feature calculator
+2025-09-18 16:20:37 | INFO     | data_normalizer:__init__:48 - Initialized data normalizer with method=zscore, outlier_method=iqr
+2025-09-18 16:20:37 | INFO     | training_data_prep:__init__:50 - Initialized training data preparator with ratios: train=0.7, val=0.15, test=0.15
+2025-09-18 16:20:37 | INFO     | main_pipeline:__init__:67 - Main pipeline initialized successfully
+2025-09-18 16:20:37 | INFO     | __main__:verify_database_connection:40 - ============================================================
+2025-09-18 16:20:37 | INFO     | __main__:verify_database_connection:41 - STEP 1: VERIFYING DATABASE CONNECTION
+2025-09-18 16:20:37 | INFO     | __main__:verify_database_connection:42 - ============================================================
+2025-09-18 16:20:37 | INFO     | duckdb_extractor:get_database_info:135 - Database info: {'database_path': 'scripts/data_collector/akshare/source/shanghai_stock_data.duckdb', 'data_type': 'stock', 'exchange_filter': 'shanghai', 'interval': '1d', 'tables': ['stock_data', 'stock_update_metadata'], 'main_table': 'stock_data', 'table_exists': True, 'total_symbols': 2287, 'total_records': 1581166, 'earliest_date': datetime.date(2022, 1, 4), 'latest_date': datetime.date(2025, 9, 17), 'trading_days': 900, 'sample_symbols': ['600000', '600004', '600006', '600007', '600008', '600009', '600010', '600011', '600012', '600015', '600016', '600017', '600018', '600019', '600020', '600021', '600022', '600023', '600025', '600026']}
+2025-09-18 16:20:37 | INFO     | __main__:verify_database_connection:51 - ✅ Database connection successful
+2025-09-18 16:20:37 | INFO     | __main__:verify_database_connection:52 -    - Data type: stock
+2025-09-18 16:20:37 | INFO     | __main__:verify_database_connection:53 -    - Exchange filter: shanghai
+2025-09-18 16:20:37 | INFO     | __main__:verify_database_connection:54 -    - Main table: stock_data
+2025-09-18 16:20:37 | INFO     | __main__:verify_database_connection:55 -    - Total symbols: 2287
+2025-09-18 16:20:37 | INFO     | __main__:verify_database_connection:56 -    - Total records: 1581166
+2025-09-18 16:20:37 | INFO     | __main__:verify_database_connection:57 -    - Date range: 2022-01-04 to 2025-09-17
+2025-09-18 16:20:37 | INFO     | __main__:verify_database_connection:58 -    - Trading days: 900
+2025-09-18 16:20:37 | INFO     | __main__:verify_symbol_extraction:69 - ============================================================
+2025-09-18 16:20:37 | INFO     | __main__:verify_symbol_extraction:70 - STEP 2: VERIFYING SYMBOL EXTRACTION
+2025-09-18 16:20:37 | INFO     | __main__:verify_symbol_extraction:71 - ============================================================
+2025-09-18 16:20:37 | INFO     | duckdb_extractor:get_available_symbols:211 - Found 1003 stock symbols with filters: exchange=shanghai, prefix=['600', '601']
+2025-09-18 16:20:37 | INFO     | __main__:verify_symbol_extraction:82 - ✅ Symbol extraction successful
+2025-09-18 16:20:37 | INFO     | __main__:verify_symbol_extraction:83 -    - Total symbols found: 1003
+2025-09-18 16:20:37 | INFO     | __main__:verify_symbol_extraction:84 -    - Symbol filter: ['600', '601']
+2025-09-18 16:20:37 | INFO     | __main__:verify_symbol_extraction:85 -    - Sample symbols: ['600000', '600004', '600006', '600007', '600008', '600009', '600010', '600011', '600012', '600015']
+2025-09-18 16:20:37 | INFO     | __main__:verify_symbol_extraction:91 -    - Symbols matching filter: 1003
+2025-09-18 16:20:37 | INFO     | __main__:verify_data_extraction:102 - ============================================================
+2025-09-18 16:20:37 | INFO     | __main__:verify_data_extraction:103 - STEP 3: VERIFYING DATA EXTRACTION
+2025-09-18 16:20:37 | INFO     | __main__:verify_data_extraction:104 - ============================================================
+2025-09-18 16:20:37 | INFO     | duckdb_extractor:extract_stock_data:287 - Executing stock data query with 7 parameters
+2025-09-18 16:20:37 | INFO     | duckdb_extractor:extract_stock_data:291 - Extracted 1000 records for 2 symbols
+2025-09-18 16:20:37 | INFO     | __main__:verify_data_extraction:121 - ✅ Data extraction successful
+2025-09-18 16:20:37 | INFO     | __main__:verify_data_extraction:122 -    - Data shape: (1000, 12)
+2025-09-18 16:20:37 | INFO     | __main__:verify_data_extraction:123 -    - Columns: ['symbol', 'date', 'open', 'high', 'low', 'close', 'volume', 'amount', 'amplitude', 'change_percent', 'change_amount', 'turnover_rate']
+2025-09-18 16:20:37 | INFO     | __main__:verify_data_extraction:124 -    - Date range in data: 2022-01-04 00:00:00 to 2024-12-31 00:00:00
+2025-09-18 16:20:37 | INFO     | __main__:verify_data_extraction:125 -    - Unique symbols: 2
+2025-09-18 16:20:37 | INFO     | __main__:verify_data_extraction:126 -    - Sample data:
+2025-09-18 16:20:37 | INFO     | __main__:verify_data_extraction:127 -    symbol       date  open  high   low  close  volume  amount  amplitude  change_percent  change_amount  turnover_rate
+0  600000 2022-01-04  7.08  7.12  7.06   7.11  377076     NaN        NaN             NaN            NaN            NaN
+1  600000 2022-01-05  7.11  7.22  7.10   7.18  554591     NaN        NaN             NaN            NaN            NaN
+2  600000 2022-01-06  7.20  7.20  7.10   7.11  410311     NaN        NaN             NaN            NaN            NaN
+3  600000 2022-01-07  7.11  7.27  7.11   7.25  630183     NaN        NaN             NaN            NaN            NaN
+4  600000 2022-01-10  7.26  7.32  7.20   7.26  340553     NaN        NaN             NaN            NaN            NaN
+2025-09-18 16:20:37 | INFO     | __main__:verify_pipeline_phases:138 - ============================================================
+2025-09-18 16:20:37 | INFO     | __main__:verify_pipeline_phases:139 - STEP 4: VERIFYING PIPELINE PHASES
+2025-09-18 16:20:37 | INFO     | __main__:verify_pipeline_phases:140 - ============================================================
+2025-09-18 16:20:37 | INFO     | __main__:verify_pipeline_phases:146 - Testing Phase 1: Data Initialization...
+2025-09-18 16:20:37 | INFO     | main_pipeline:run_initialization_phase:165 - ============================================================
+2025-09-18 16:20:37 | INFO     | main_pipeline:run_initialization_phase:166 - PHASE 2: DATA INITIALIZATION
+2025-09-18 16:20:37 | INFO     | main_pipeline:run_initialization_phase:167 - ============================================================
+2025-09-18 16:20:37 | INFO     | data_initializer:initialize_data:333 - Starting complete data initialization...
+2025-09-18 16:20:37 | INFO     | data_initializer:filter_valid_stocks:80 - Filtering valid stocks...
+2025-09-18 16:20:37 | INFO     | data_initializer:filter_valid_stocks:104 - Filtered stocks: kept 2, removed 0
+2025-09-18 16:20:37 | INFO     | data_initializer:filter_valid_stocks:105 - Remaining data: 1000 records
+2025-09-18 16:20:37 | INFO     | data_initializer:create_panel_data_structure:124 - Creating panel data structure...
+2025-09-18 16:20:37 | INFO     | data_initializer:create_complete_date_range:60 - Created complete date range: 726 trading days
+2025-09-18 16:20:37 | INFO     | data_initializer:create_complete_date_range:61 - Date range: 2022-01-04 to 2024-12-31
+2025-09-18 16:20:37 | INFO     | data_initializer:create_panel_data_structure:130 - Panel structure: 2 symbols × 726 dates
+2025-09-18 16:20:37 | INFO     | data_initializer:create_panel_data_structure:150 - Created panel data: 1452 total records
+2025-09-18 16:20:37 | INFO     | data_initializer:create_panel_data_structure:151 - Missing data ratio: 54.64%
+2025-09-18 16:20:37 | INFO     | data_initializer:handle_missing_values:170 - Handling missing values...
+2025-09-18 16:20:37 | INFO     | data_initializer:handle_missing_values:215 - Missing value handling completed
+2025-09-18 16:20:37 | INFO     | data_initializer:calculate_basic_features:234 - Calculating basic features...
+2025-09-18 16:20:37 | INFO     | data_initializer:calculate_basic_features:270 - Added basic features: ['return', 'log_return', 'vwap', 'price_range', 'price_range_pct', 'gap']
+2025-09-18 16:20:37 | INFO     | data_initializer:validate_data_integrity:289 - Validating data integrity...
+2025-09-18 16:20:37 | INFO     | data_initializer:validate_data_integrity:314 - Data validation completed: {'total_records': 1452, 'unique_symbols': 2, 'date_range': {'start': Timestamp('2022-01-04 00:00:00'), 'end': Timestamp('2024-12-31 00:00:00'), 'trading_days': 726}, 'missing_data': {'symbol': 0, 'date': 0, 'open': 0, 'high': 0, 'low': 0, 'close': 0, 'volume': 0, 'amount': 0, 'amplitude': 0, 'change_percent': 0, 'change_amount': 0, 'turnover_rate': 0}, 'data_quality': {'negative_prices': np.int64(0), 'invalid_price_relationships': np.int64(0), 'extreme_returns': 0}}
+2025-09-18 16:20:37 | INFO     | data_initializer:initialize_data:350 - Data initialization completed successfully
+2025-09-18 16:20:37 | INFO     | main_pipeline:run_initialization_phase:172 - Data initialization phase completed successfully
+2025-09-18 16:20:37 | INFO     | __main__:verify_pipeline_phases:148 - ✅ Initialization: (1452, 12)
+2025-09-18 16:20:37 | INFO     | __main__:verify_pipeline_phases:152 - Testing Phase 2: Feature Engineering...
+2025-09-18 16:20:37 | INFO     | main_pipeline:run_feature_engineering_phase:182 - ============================================================
+2025-09-18 16:20:37 | INFO     | main_pipeline:run_feature_engineering_phase:183 - PHASE 3: FEATURE ENGINEERING (ALPHA 158)
+2025-09-18 16:20:37 | INFO     | main_pipeline:run_feature_engineering_phase:184 - ============================================================
+2025-09-18 16:20:37 | INFO     | alpha158_calculator:calculate_alpha158_features:274 - Starting Alpha 158 feature calculation...
+2025-09-18 16:20:37 | INFO     | alpha158_calculator:calculate_alpha158_features:297 - Processing 2 symbols...
+2025-09-18 16:20:37 | INFO     | alpha158_calculator:_return_features:59 - Calculating return features...
+2025-09-18 16:20:37 | INFO     | alpha158_calculator:_moving_average_features:82 - Calculating moving average features...
+2025-09-18 16:20:37 | INFO     | alpha158_calculator:_volatility_features:105 - Calculating volatility features...
+2025-09-18 16:20:37 | INFO     | alpha158_calculator:_momentum_features:128 - Calculating momentum features...
+2025-09-18 16:20:37 | INFO     | alpha158_calculator:_volume_features:158 - Calculating volume features...
+2025-09-18 16:20:37 | INFO     | alpha158_calculator:_correlation_features:182 - Calculating correlation features...
+2025-09-18 16:20:37 | INFO     | alpha158_calculator:_technical_indicators:199 - Calculating technical indicators...
+2025-09-18 16:20:37 | INFO     | alpha158_calculator:_return_features:59 - Calculating return features...
+2025-09-18 16:20:38 | INFO     | alpha158_calculator:_moving_average_features:82 - Calculating moving average features...
+2025-09-18 16:20:38 | INFO     | alpha158_calculator:_volatility_features:105 - Calculating volatility features...
+2025-09-18 16:20:38 | INFO     | alpha158_calculator:_momentum_features:128 - Calculating momentum features...
+2025-09-18 16:20:38 | INFO     | alpha158_calculator:_volume_features:158 - Calculating volume features...
+2025-09-18 16:20:38 | INFO     | alpha158_calculator:_correlation_features:182 - Calculating correlation features...
+2025-09-18 16:20:38 | INFO     | alpha158_calculator:_technical_indicators:199 - Calculating technical indicators...
+2025-09-18 16:20:38 | INFO     | alpha158_calculator:_cross_sectional_features:239 - Calculating cross-sectional features...
+2025-09-18 16:20:39 | INFO     | alpha158_calculator:calculate_alpha158_features:319 - Alpha 158 calculation completed. Generated 171 features
+2025-09-18 16:20:39 | INFO     | alpha158_calculator:get_feature_summary:373 - Feature summary: 171 features calculated
+2025-09-18 16:20:39 | INFO     | main_pipeline:run_feature_engineering_phase:192 - Feature engineering phase completed successfully
+2025-09-18 16:20:39 | INFO     | __main__:verify_pipeline_phases:154 - ✅ Feature Engineering: (1452, 179)
+2025-09-18 16:20:39 | INFO     | __main__:verify_pipeline_phases:155 -    - Features generated: 171
+2025-09-18 16:20:39 | INFO     | __main__:verify_pipeline_phases:163 - Testing Phase 3: Data Normalization...
+2025-09-18 16:20:39 | INFO     | main_pipeline:run_normalization_phase:202 - ============================================================
+2025-09-18 16:20:39 | INFO     | main_pipeline:run_normalization_phase:203 - PHASE 4: DATA NORMALIZATION
+2025-09-18 16:20:39 | INFO     | main_pipeline:run_normalization_phase:204 - ============================================================
+2025-09-18 16:20:39 | INFO     | data_normalizer:clean_and_normalize_pipeline:373 - Starting complete data cleaning and normalization pipeline...
+2025-09-18 16:20:39 | INFO     | data_normalizer:detect_outliers:62 - Detecting outliers using iqr method...
+2025-09-18 16:20:39 | INFO     | data_normalizer:detect_outliers:102 - Detected 4023 outliers across 177 columns
+2025-09-18 16:20:39 | INFO     | data_normalizer:handle_outliers:123 - Handling outliers using clip method...
+2025-09-18 16:20:39 | INFO     | data_normalizer:handle_outliers:163 - Outlier handling completed. Remaining records: 1452
+2025-09-18 16:20:39 | INFO     | data_normalizer:fill_missing_values:182 - Filling missing values using forward method...
+2025-09-18 16:20:39 | INFO     | data_normalizer:fill_missing_values:221 - Missing value filling completed. Remaining missing values: 0
+2025-09-18 16:20:39 | INFO     | data_normalizer:normalize_features:241 - Normalizing features using zscore method...
+2025-09-18 16:20:39 | INFO     | data_normalizer:normalize_features:308 - Feature normalization completed for 171 features
+2025-09-18 16:20:39 | INFO     | data_normalizer:cross_sectional_normalize:332 - Applying cross-sectional normalization...
+2025-09-18 16:21:14 | INFO     | data_normalizer:cross_sectional_normalize:353 - Cross-sectional normalization completed for 171 features
+2025-09-18 16:21:14 | INFO     | data_normalizer:validate_normalized_data:413 - Validating normalized data...
+2025-09-18 16:21:14 | INFO     | data_normalizer:validate_normalized_data:445 - Data validation completed. Quality score: 1.000
+2025-09-18 16:21:14 | INFO     | data_normalizer:clean_and_normalize_pipeline:394 - Data cleaning and normalization pipeline completed successfully
+2025-09-18 16:21:14 | INFO     | data_normalizer:save_normalization_params:472 - Normalization parameters saved to scripts/data_collector/akshare/training_data/normalization_params.pkl
+2025-09-18 16:21:14 | INFO     | main_pipeline:run_normalization_phase:214 - Data normalization phase completed successfully
+2025-09-18 16:21:14 | INFO     | __main__:verify_pipeline_phases:165 - ✅ Normalization: (1452, 521)
+2025-09-18 16:21:14 | INFO     | __main__:verify_pipeline_phases:166 -    - Data quality score: 1.0
+2025-09-18 16:21:14 | INFO     | __main__:verify_pipeline_phases:174 - Testing Phase 4: Training Data Preparation...
+2025-09-18 16:21:14 | INFO     | main_pipeline:run_training_preparation_phase:224 - ============================================================
+2025-09-18 16:21:14 | INFO     | main_pipeline:run_training_preparation_phase:225 - PHASE 5: TRAINING DATA PREPARATION
+2025-09-18 16:21:14 | INFO     | main_pipeline:run_training_preparation_phase:226 - ============================================================
+2025-09-18 16:21:14 | INFO     | training_data_prep:prepare_complete_training_dataset:350 - Starting complete training dataset preparation...
+2025-09-18 16:21:14 | INFO     | training_data_prep:create_labels:64 - Creating return labels with horizon=1
+2025-09-18 16:21:14 | ERROR    | training_data_prep:create_labels:110 - Error creating labels: ['label']
+2025-09-18 16:21:14 | ERROR    | training_data_prep:prepare_complete_training_dataset:411 - Error in complete training dataset preparation: ['label']
+2025-09-18 16:21:14 | ERROR    | main_pipeline:run_training_preparation_phase:243 - Error in training preparation phase: ['label']
+2025-09-18 16:21:14 | ERROR    | __main__:verify_pipeline_phases:198 - ❌ Pipeline phase failed: ['label']
+2025-09-18 16:21:14 | ERROR    | __main__:main:318 - ❌ Pipeline phases failed. Stopping.

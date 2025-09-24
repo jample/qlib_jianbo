@@ -1,0 +1,20 @@
+{
+  "valid": {
+    "n_days": 0,
+    "ic_mean": NaN,
+    "ic_std": NaN,
+    "rank_ic_mean": NaN,
+    "rank_ic_std": NaN,
+    "overall_ic": 0.004638902310736941,
+    "overall_rank_ic": 0.0459243425071819
+  },
+  "test": {
+    "n_days": 0,
+    "ic_mean": NaN,
+    "ic_std": NaN,
+    "rank_ic_mean": NaN,
+    "rank_ic_std": NaN,
+    "overall_ic": -0.01711304665247243,
+    "overall_rank_ic": 0.04266568828181669
+  }
+}

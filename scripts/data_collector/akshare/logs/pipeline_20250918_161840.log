@@ -1,0 +1,2 @@
+2025-09-18 16:18:40 | INFO     | main_pipeline:setup_logging:121 - Logging setup completed. Log file: scripts/data_collector/akshare/logs/pipeline_20250918_161840.log
+2025-09-18 16:18:40 | ERROR    | __main__:main:327 - ❌ Verification failed with error: 'db_path'

@@ -1,0 +1,58 @@
+{
+  "data_type": "stock",
+  "exchange_filter": "shanghai",
+  "interval": "1d",
+  "symbol_filter": ["600", "601"],
+  "date_range": {
+    "start_date": "2022-01-01",
+    "end_date": "2024-12-31"
+  },
+  "qlib_data_dir": "scripts/data_collector/akshare/qlib_data",
+  "output_dir": "scripts/data_collector/akshare/qlib_output",
+  "duckdb_path": "scripts/data_collector/akshare/source/shanghai_stock_data.db",
+  "instruments": "all",
+  "train_period": ["2022-01-01", "2023-12-31"],
+  "valid_period": ["2024-01-01", "2024-06-30"],
+  "test_period": ["2024-07-01", "2024-12-31"],
+  "model_config": {
+    "class": "LGBModel",
+    "module_path": "qlib.contrib.model.gbdt",
+    "kwargs": {
+      "loss": "mse",
+      "colsample_bytree": 0.8879,
+      "learning_rate": 0.0421,
+      "subsample": 0.8789,
+      "lambda_l1": 205.6999,
+      "lambda_l2": 580.9768,
+      "max_depth": 8,
+      "num_leaves": 210,
+      "num_threads": 20
+    }
+  },
+  "alpha158_config": {
+    "kbar": {},
+    "price": {
+      "windows": [0, 1, 2, 3, 4],
+      "feature": ["OPEN", "HIGH", "LOW", "CLOSE", "VWAP"]
+    },
+    "volume": {
+      "windows": [0, 1, 2, 3, 4]
+    },
+    "rolling": {
+      "windows": [5, 10, 20, 30, 60],
+      "include": ["ROC", "MA", "STD", "RANK", "MAX", "MIN"],
+      "exclude": []
+    }
+  },
+  "processors": {
+    "infer_processors": [
+      {"class": "ProcessInf", "kwargs": {}},
+      {"class": "ZScoreNorm", "kwargs": {}},
+      {"class": "Fillna", "kwargs": {}}
+    ],
+    "learn_processors": [
+      {"class": "DropnaLabel"},
+      {"class": "CSZScoreNorm", "kwargs": {"fields_group": "label"}}
+    ]
+  }
+}

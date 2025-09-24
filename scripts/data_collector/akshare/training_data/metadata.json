@@ -1,0 +1,17 @@
+{
+  "created_at": "2025-09-18T16:24:48.903577",
+  "train_samples": 1014,
+  "val_samples": 218,
+  "test_samples": 218,
+  "num_features": 513,
+  "data_shape": [
+    1014,
+    513
+  ],
+  "config": {
+    "train_ratio": 0.7,
+    "val_ratio": 0.15,
+    "test_ratio": 0.15,
+    "prediction_horizon": 1
+  }
+}

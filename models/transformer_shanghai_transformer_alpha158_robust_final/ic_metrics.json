@@ -1,0 +1,29 @@
+{
+  "train": {
+    "n_days": 0,
+    "ic_mean": NaN,
+    "ic_std": NaN,
+    "rank_ic_mean": NaN,
+    "rank_ic_std": NaN,
+    "overall_ic": 0.11961654683163836,
+    "overall_rank_ic": 0.13118088616494464
+  },
+  "valid": {
+    "n_days": 0,
+    "ic_mean": NaN,
+    "ic_std": NaN,
+    "rank_ic_mean": NaN,
+    "rank_ic_std": NaN,
+    "overall_ic": 0.046868046110288365,
+    "overall_rank_ic": 0.07036988821330403
+  },
+  "test": {
+    "n_days": 0,
+    "ic_mean": NaN,
+    "ic_std": NaN,
+    "rank_ic_mean": NaN,
+    "rank_ic_std": NaN,
+    "overall_ic": -0.07534284512965081,
+    "overall_rank_ic": -0.02328579775242084
+  }
+}
