@@ -10,8 +10,8 @@ benchmark: SH000001
 
 # Data extraction and preparation configuration
 data_config:
-  start_time: "2020-01-01"
-  end_time: "2023-12-31"
+  start_time: "2023-01-01"
+  end_time: "2024-12-31"
   symbols: ["600000", "600036", "600519", "600887", "601318"]  # Sample Shanghai stocks
   min_periods: 100  # Minimum trading days required per stock
   exchange_filter: "shanghai"
@@ -20,16 +20,19 @@ data_config:
 # Model configuration
 model_config:
   dataset: "Shanghai_Alpha158"
-  label_shift: 5  # 5-day forward prediction horizon
+  label_shift: 1  # 1-day forward prediction horizon for ROI and BOLL ratios
   model_folder: "shanghai_tft_models"
   gpu_id: 0
+  prediction_targets:
+    - "ROI_RATIO"      # N+1 day / 5 day profit ratio
+    - "BOLL_VOL_RATIO" # N+1 day / 5 day BOLL volatility ratio
   
 # Training/validation/test split configuration
 training_config:
   segments:
-    train: ["2020-01-01", "2022-12-31"]  # 3 years training
-    valid: ["2023-01-01", "2023-06-30"]  # 6 months validation
-    test: ["2023-07-01", "2023-12-31"]   # 6 months testing
+    train: ["2023-01-01", "2024-06-07"]  # Training data: 2023.1.1 - 2024.6.7
+    valid: ["2024-06-10", "2024-09-30"]  # Validation data: 2024.6.10 - 2024.9.30
+    test: ["2024-10-16", "2024-12-31"]   # Testing data: 2024.10.16 - 2024.12.31
 
 # TFT hyperparameters (optimized for Shanghai stock data)
 tft_hyperparameters:
@@ -53,49 +56,71 @@ tft_hyperparameters:
 
 # Feature configuration for Shanghai stocks
 feature_config:
-  # Alpha158 features optimized for TFT
+  # Enhanced Alpha158 features optimized for TFT with ROI and BOLL indicators
   selected_features:
     # Price position features
     - "KLEN"   # (close - low) / (high - low)
-    - "KLOW"   # (close - low) / (open - low)  
+    - "KLOW"   # (close - low) / (open - low)
     - "KMID"   # (close - open) / (high - low)
     - "KUP"    # (high - close) / (high - open)
-    
+
     # Volatility features
     - "STD5"   # 5-day standard deviation
     - "STD10"  # 10-day standard deviation
     - "STD20"  # 20-day standard deviation
-    
+
     # Momentum features
     - "ROC5"   # 5-day rate of change
     - "ROC10"  # 10-day rate of change
     - "ROC20"  # 20-day rate of change
-    
+
     # Moving average features
     - "MA5"    # 5-day moving average
     - "MA10"   # 10-day moving average
     - "MA20"   # 20-day moving average
-    
+
     # Extrema features
     - "MAX5"   # 5-day maximum
     - "MAX10"  # 10-day maximum
     - "MIN5"   # 5-day minimum
     - "MIN10"  # 10-day minimum
-    
+
     # Rank features
     - "RANK5"  # 5-day rank
     - "RANK10" # 10-day rank
-    
+
     # Relative strength features
     - "RSV5"   # 5-day relative strength value
     - "RSV10"  # 10-day relative strength value
-    
+
     # Beta and correlation features
     - "BETA5"  # 5-day beta
     - "BETA10" # 10-day beta
     - "RSQR5"  # 5-day R-squared
     - "RSQR10" # 10-day R-squared
     - "RSQR20" # 20-day R-squared
+
+    # New ROI (Return on Investment) features
+    - "ROI_1D"           # 1-day forward ROI
+    - "ROI_5D"           # 5-day forward ROI
+    - "ROI_RATIO_1D_5D"  # ROI ratio: 1-day / 5-day
+    - "ROI_CUM_1D"       # 1-day cumulative ROI
+    - "ROI_CUM_5D"       # 5-day cumulative ROI
+    - "ROI_VOL_1D"       # 1-day ROI volatility
+    - "ROI_VOL_5D"       # 5-day ROI volatility
+    - "ROI_SHARPE_1D"    # 1-day ROI Sharpe ratio
+    - "ROI_SHARPE_5D"    # 5-day ROI Sharpe ratio
+
+    # New BOLL (Bollinger Bands) volatility features
+    - "BOLL_VOL_1D"         # 1-day BOLL volatility
+    - "BOLL_VOL_5D"         # 5-day BOLL volatility
+    - "BOLL_VOL_RATIO_1D_5D" # BOLL volatility ratio: 1-day / 5-day
+    - "BOLL_MOMENTUM_1D"    # 1-day BOLL momentum
+    - "BOLL_MOMENTUM_5D"    # 5-day BOLL momentum
+    - "BOLL_TREND_1D"       # 1-day BOLL trend
+    - "BOLL_TREND_5D"       # 5-day BOLL trend
+    - "BOLL_SQUEEZE_1D"     # 1-day BOLL squeeze detection
+    - "BOLL_SQUEEZE_5D"     # 5-day BOLL squeeze detection
 
   # Input type mapping for TFT
   input_types:
@@ -110,7 +135,7 @@ feature_config:
     observed_inputs:
       # All Alpha158 features are observed inputs
       - "KLEN"
-      - "KLOW" 
+      - "KLOW"
       - "KMID"
       - "KUP"
       - "STD5"
@@ -135,6 +160,26 @@ feature_config:
       - "RSQR5"
       - "RSQR10"
       - "RSQR20"
+      # New ROI features
+      - "ROI_1D"
+      - "ROI_5D"
+      - "ROI_RATIO_1D_5D"
+      - "ROI_CUM_1D"
+      - "ROI_CUM_5D"
+      - "ROI_VOL_1D"
+      - "ROI_VOL_5D"
+      - "ROI_SHARPE_1D"
+      - "ROI_SHARPE_5D"
+      # New BOLL features
+      - "BOLL_VOL_1D"
+      - "BOLL_VOL_5D"
+      - "BOLL_VOL_RATIO_1D_5D"
+      - "BOLL_MOMENTUM_1D"
+      - "BOLL_MOMENTUM_5D"
+      - "BOLL_TREND_1D"
+      - "BOLL_TREND_5D"
+      - "BOLL_SQUEEZE_1D"
+      - "BOLL_SQUEEZE_5D"
 
 # Evaluation configuration
 evaluation_config:
@@ -149,8 +194,8 @@ evaluation_config:
   
   # Backtesting configuration
   backtest:
-    start_time: "2023-07-01"
-    end_time: "2023-12-31"
+    start_time: "2024-10-16"
+    end_time: "2024-12-31"
     account: 100000000  # 100M initial capital
     benchmark: "SH000001"
     

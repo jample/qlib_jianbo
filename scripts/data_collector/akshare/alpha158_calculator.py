@@ -187,7 +187,38 @@ class Alpha158Calculator:
             df[f'AUTOCORR{window}'] = self._correlation(df['return'], df['return'].shift(1), window)
         
         return df
-    
+
+    def _roi_features(self, df: pd.DataFrame, windows: List[int] = [1, 5]) -> pd.DataFrame:
+        """Calculate ROI (Return on Investment) features for different horizons"""
+
+        for window in windows:
+            # Forward ROI calculation: (close_t+N / close_t) - 1
+            future_close = df['close'].shift(-window)
+            current_close = df['close']
+            roi = (future_close / current_close) - 1
+            df[f'ROI_{window}D'] = roi
+
+            # ROI ratio: ROI_N+1 / ROI_5 (for N+1 day vs 5 day comparison)
+            if window == 1:
+                # Calculate 1-day vs 5-day ROI ratio
+                roi_5d = (df['close'].shift(-5) / df['close']) - 1
+                df['ROI_RATIO_1D_5D'] = roi / roi_5d.replace(0, np.nan)
+
+            # Cumulative ROI over window
+            df[f'ROI_CUM_{window}D'] = df['return'].rolling(window).apply(
+                lambda x: (1 + x).prod() - 1, raw=False
+            )
+
+            # ROI volatility (standard deviation of returns over window)
+            df[f'ROI_VOL_{window}D'] = df['return'].rolling(window).std()
+
+            # ROI Sharpe ratio (mean return / std return)
+            mean_return = df['return'].rolling(window).mean()
+            std_return = df['return'].rolling(window).std()
+            df[f'ROI_SHARPE_{window}D'] = mean_return / std_return.replace(0, np.nan)
+
+        return df
+
     def _technical_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         """Calculate additional technical indicators"""
 
@@ -198,15 +229,37 @@ class Alpha158Calculator:
         df['MACD_SIGNAL'] = df['MACD'].ewm(span=9).mean()
         df['MACD_HIST'] = df['MACD'] - df['MACD_SIGNAL']
         
-        # Bollinger Bands
-        bb_window = 20
+        # Enhanced Bollinger Bands with multiple windows
+        bb_windows = [1, 5, 20]  # N+1 day, 5-day, and traditional 20-day
         bb_std = 2
-        bb_ma = df['close'].rolling(bb_window).mean()
-        bb_std_val = df['close'].rolling(bb_window).std()
-        df['BB_UPPER'] = bb_ma + (bb_std_val * bb_std)
-        df['BB_LOWER'] = bb_ma - (bb_std_val * bb_std)
-        df['BB_WIDTH'] = (df['BB_UPPER'] - df['BB_LOWER']) / bb_ma
-        df['BB_POSITION'] = (df['close'] - df['BB_LOWER']) / (df['BB_UPPER'] - df['BB_LOWER'])
+
+        for window in bb_windows:
+            bb_ma = df['close'].rolling(window).mean()
+            bb_std_val = df['close'].rolling(window).std()
+
+            # Traditional Bollinger Bands
+            df[f'BB_UPPER_{window}D'] = bb_ma + (bb_std_val * bb_std)
+            df[f'BB_LOWER_{window}D'] = bb_ma - (bb_std_val * bb_std)
+            df[f'BB_WIDTH_{window}D'] = (df[f'BB_UPPER_{window}D'] - df[f'BB_LOWER_{window}D']) / bb_ma
+            df[f'BB_POSITION_{window}D'] = (df['close'] - df[f'BB_LOWER_{window}D']) / (df[f'BB_UPPER_{window}D'] - df[f'BB_LOWER_{window}D'])
+
+            # BOLL Volatility Indicators for prediction targets
+            df[f'BOLL_VOL_{window}D'] = bb_std_val / bb_ma  # Normalized volatility
+            df[f'BOLL_SQUEEZE_{window}D'] = df[f'BB_WIDTH_{window}D'].rolling(10).min() == df[f'BB_WIDTH_{window}D']  # Squeeze detection
+
+            # BOLL momentum indicators
+            df[f'BOLL_MOMENTUM_{window}D'] = (df['close'] - bb_ma) / bb_std_val  # Z-score
+            df[f'BOLL_TREND_{window}D'] = bb_ma.diff() / bb_ma.shift(1)  # Trend direction
+
+        # BOLL volatility ratios for prediction targets
+        if 'BOLL_VOL_1D' in df.columns and 'BOLL_VOL_5D' in df.columns:
+            df['BOLL_VOL_RATIO_1D_5D'] = df['BOLL_VOL_1D'] / df['BOLL_VOL_5D'].replace(0, np.nan)
+
+        # Legacy columns for backward compatibility
+        df['BB_UPPER'] = df['BB_UPPER_20D']
+        df['BB_LOWER'] = df['BB_LOWER_20D']
+        df['BB_WIDTH'] = df['BB_WIDTH_20D']
+        df['BB_POSITION'] = df['BB_POSITION_20D']
         
         # Stochastic Oscillator
         stoch_window = 14
@@ -325,6 +378,7 @@ class Alpha158Calculator:
         df = self._momentum_features(df)
         df = self._volume_features(df)
         df = self._correlation_features(df)
+        df = self._roi_features(df)  # Add ROI features
         df = self._technical_indicators(df)
 
         return df

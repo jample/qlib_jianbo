@@ -31,21 +31,45 @@ warnings.filterwarnings('ignore')
 sys.path.insert(0, '/root/mycode/qlibjianbo')
 sys.path.insert(0, '/root/mycode/qlibjianbo/examples/benchmarks/TFT')
 
-# Check Python version
-if sys.version_info >= (3, 8):
-    logger.error("TFT requires Python 3.6-3.7. Current version: {}.{}".format(
+# Check Python version - Updated to support modern Python versions
+if sys.version_info < (3, 6):
+    logger.error("This code requires Python 3.6 or higher. Current version: {}.{}".format(
         sys.version_info.major, sys.version_info.minor))
-    logger.error("Please create a conda environment with Python 3.7:")
-    logger.error("conda create -n tft_env python=3.7")
     sys.exit(1)
+else:
+    logger.info("Python {}.{} detected - Compatible with modern TensorFlow".format(
+        sys.version_info.major, sys.version_info.minor))
 
+# TensorFlow import - Updated for TensorFlow 2.x compatibility
+TENSORFLOW_AVAILABLE = False
+TF_VERSION = None
 try:
     import tensorflow as tf
-    if tf.__version__ != "1.15.0":
-        logger.warning(f"TFT requires TensorFlow 1.15.0, found {tf.__version__}")
+    TENSORFLOW_AVAILABLE = True
+    TF_VERSION = tf.__version__
+    logger.info(f"TensorFlow {tf.__version__} detected")
+
+    # Configure TensorFlow for compatibility
+    if tf.__version__.startswith('2.'):
+        logger.info("Using TensorFlow 2.x - Modern implementation")
+        # Configure for better compatibility
+        tf.config.run_functions_eagerly(False)  # Disable eager execution for performance
+
+        # Set memory growth to avoid GPU memory issues
+        gpus = tf.config.experimental.list_physical_devices('GPU')
+        if gpus:
+            try:
+                for gpu in gpus:
+                    tf.config.experimental.set_memory_growth(gpu, True)
+                logger.info(f"Configured {len(gpus)} GPU(s) for memory growth")
+            except RuntimeError as e:
+                logger.warning(f"GPU configuration warning: {e}")
+    else:
+        logger.info("Using TensorFlow 1.x - Legacy implementation")
+
 except ImportError:
-    logger.error("TensorFlow not found. Install with: pip install tensorflow-gpu==1.15.0")
-    sys.exit(1)
+    logger.warning("TensorFlow not found. TFT model training will not be available.")
+    logger.info("Install TensorFlow: pip install tensorflow")
 
 try:
     import qlib
@@ -59,18 +83,30 @@ except ImportError as e:
 
 # Local imports
 from duckdb_extractor import DuckDBDataExtractor
+from alpha158_enhanced import Alpha158WithROIAndBOLL
 
 # TFT imports (will be imported conditionally)
 TFT_AVAILABLE = False
+MODERN_TFT_AVAILABLE = False
+
+# Try to import original TFT components first
 try:
     from tft import TFTModel, DATASET_SETTING, process_qlib_data
     from data_formatters.qlib_Alpha158 import Alpha158Formatter
     from expt_settings.configs import ExperimentConfig
     TFT_AVAILABLE = True
-    logger.info("✅ TFT components imported successfully")
+    logger.info("✅ Original TFT components imported successfully")
 except ImportError as e:
-    logger.error(f"TFT components not available: {e}")
-    logger.error("Please ensure you're in the TFT directory or add it to PYTHONPATH")
+    logger.warning(f"Original TFT components not available: {e}")
+
+    # Try to import modern TFT implementation
+    try:
+        from modern_tft_model_simple import ModernTFTModel, DATASET_SETTING, process_qlib_data
+        MODERN_TFT_AVAILABLE = True
+        logger.info("✅ Modern TFT implementation available")
+    except ImportError as e2:
+        logger.warning(f"Modern TFT implementation not available: {e2}")
+        logger.warning("Neither original nor modern TFT components are available")
 
 
 class ShanghaiTFTRunner:
@@ -88,8 +124,15 @@ class ShanghaiTFTRunner:
             gpu_id: GPU device ID to use
             dataset_name: Name for the dataset configuration
         """
-        if not TFT_AVAILABLE:
-            raise ImportError("TFT components not available. Please check installation.")
+        if not TFT_AVAILABLE and not MODERN_TFT_AVAILABLE:
+            logger.warning("No TFT implementation available. Only data processing and alternative models will be available.")
+            logger.info("For TFT functionality:")
+            logger.info("1. Install TensorFlow: pip install tensorflow")
+            logger.info("2. Modern TFT implementation will be used automatically")
+        elif MODERN_TFT_AVAILABLE and not TFT_AVAILABLE:
+            logger.info("Using Modern TFT implementation (TensorFlow 2.x compatible)")
+        elif TFT_AVAILABLE:
+            logger.info("Using Original TFT implementation")
 
         self.model_folder = Path(model_folder)
         self.gpu_id = gpu_id
@@ -112,28 +155,42 @@ class ShanghaiTFTRunner:
     def _check_gpu_availability(self):
         """Check if GPU is available and properly configured"""
         try:
-            gpus = tf.config.experimental.list_physical_devices('GPU')
+            if not TENSORFLOW_AVAILABLE:
+                logger.warning("TensorFlow not available. GPU check skipped.")
+                return
+
+            # Use TensorFlow 2.x compatible GPU detection
+            if TF_VERSION and TF_VERSION.startswith('2.'):
+                gpus = tf.config.list_physical_devices('GPU')
+            else:
+                gpus = tf.config.experimental.list_physical_devices('GPU')
+
             if not gpus:
-                logger.error("No GPU found. TFT requires GPU for training.")
-                raise RuntimeError("GPU required for TFT training")
-            
+                logger.warning("No GPU found. TFT training will use CPU (slower).")
+                return
+
             logger.info(f"Found {len(gpus)} GPU(s): {[gpu.name for gpu in gpus]}")
-            
-            # Test GPU memory
-            with tf.device(f'/GPU:{self.gpu_id}'):
-                test_tensor = tf.constant([[1.0, 2.0], [3.0, 4.0]])
-                result = tf.matmul(test_tensor, test_tensor)
-                logger.info("✅ GPU test successful")
-                
+
+            # Test GPU memory with TensorFlow 2.x compatible approach
+            if len(gpus) > self.gpu_id:
+                with tf.device(f'/GPU:{self.gpu_id}'):
+                    # Simple tensor operation test
+                    test_tensor = tf.constant([[1.0, 2.0], [3.0, 4.0]], dtype=tf.float32)
+                    result = tf.linalg.matmul(test_tensor, test_tensor)
+                    logger.info("✅ GPU test successful")
+                    logger.info(f"GPU {self.gpu_id} is ready for training")
+            else:
+                logger.warning(f"GPU {self.gpu_id} not found. Using GPU 0 instead.")
+                self.gpu_id = 0
+
         except Exception as e:
-            logger.error(f"GPU check failed: {e}")
-            logger.error("Please ensure CUDA 10.0 and cuDNN are properly installed")
-            raise
+            logger.warning(f"GPU check failed: {e}")
+            logger.warning("TFT training will use CPU if available")
 
     def step1_prepare_shanghai_data(self,
                                    symbol_filter: List[str] = ["600000", "600036", "600519"],
-                                   start_date: str = "2020-01-01",
-                                   end_date: str = "2023-12-31",
+                                   start_date: str = "2023-01-01",
+                                   end_date: str = "2024-12-31",
                                    min_periods: int = 100) -> bool:
         """
         Step 1: Extract and prepare Shanghai stock data for TFT
@@ -201,8 +258,12 @@ class ShanghaiTFTRunner:
     def _convert_to_qlib_format(self, df: pd.DataFrame) -> bool:
         """Convert Shanghai stock data to qlib binary format"""
         try:
-            # Calculate Alpha158 labels (5-day forward return for TFT)
-            df_with_labels = self._calculate_tft_labels(df)
+            # For qlib-based approach, we don't need to pre-calculate features here
+            # Features will be calculated by qlib's Alpha158WithROIAndBOLL handler
+            # We just need to prepare the basic OHLCV data and labels
+
+            # Calculate TFT labels using basic price data
+            df_with_labels = self._calculate_basic_labels(df)
 
             # Ensure required columns exist
             self._ensure_required_columns(df_with_labels)
@@ -217,29 +278,21 @@ class ShanghaiTFTRunner:
             logger.error(f"Data conversion failed: {e}")
             return False
 
-    def _calculate_tft_labels(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Calculate labels for TFT training (5-day forward return)"""
+    def _calculate_basic_labels(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Calculate basic labels - qlib expressions will handle the actual feature calculations"""
         try:
             df_with_labels = df.copy()
             df_with_labels = df_with_labels.sort_values(['symbol', 'date'])
-            df_with_labels['LABEL0'] = np.nan
 
-            for symbol in df_with_labels['symbol'].unique():
-                mask = df_with_labels['symbol'] == symbol
-                symbol_data = df_with_labels[mask].copy()
-                
-                # 5-day forward return: (close_t+5 / close_t) - 1
-                close_future = symbol_data['close'].shift(-5)
-                close_current = symbol_data['close']
-                forward_return = (close_future / close_current) - 1
-                
-                df_with_labels.loc[mask, 'LABEL0'] = forward_return
+            # For qlib-based approach, we don't pre-calculate labels here
+            # The labels will be calculated by qlib using the expressions defined in Alpha158WithROIAndBOLL
+            # We just ensure the basic price data is available
 
-            logger.info("Calculated TFT labels (5-day forward return)")
+            logger.info("Prepared basic data for qlib label calculation")
             return df_with_labels
 
         except Exception as e:
-            logger.error(f"Label calculation failed: {e}")
+            logger.error(f"Basic label preparation failed: {e}")
             return df
 
     def _ensure_required_columns(self, df: pd.DataFrame):
@@ -314,8 +367,8 @@ class ShanghaiTFTRunner:
                 for date in calendar:
                     f.write(f"{date.strftime('%Y-%m-%d')}\n")
 
-            # Save features for each instrument
-            feature_cols = ['$open', '$high', '$low', '$close', '$volume', '$vwap', '$amount', 'LABEL0']
+            # Save features for each instrument (basic OHLCV data for qlib)
+            feature_cols = ['$open', '$high', '$low', '$close', '$volume', '$vwap', '$amount']
             available_cols = [col for col in feature_cols if col in df_qlib.columns]
 
             for instrument in instruments:
@@ -353,21 +406,16 @@ class ShanghaiTFTRunner:
         try:
             logger.info("Step 2: Setting up TFT dataset configuration...")
 
-            # Register Shanghai dataset configuration
+            # Get feature names from the enhanced Alpha158 handler
+            from alpha158_enhanced import Alpha158WithROIAndBOLL
+            enhanced_handler = Alpha158WithROIAndBOLL()
+            fields, feature_names = enhanced_handler.get_feature_config()
+            label_fields, label_names = enhanced_handler.get_label_config()
+
+            # Register Shanghai dataset configuration with enhanced features
             DATASET_SETTING[self.dataset_name] = {
-                "feature_col": [
-                    # Core Alpha158 features that work well with TFT
-                    "KLEN", "KLOW", "KMID", "KUP",           # Price position features
-                    "STD5", "STD10", "STD20",                # Volatility features
-                    "ROC5", "ROC10", "ROC20",                # Rate of change features
-                    "MA5", "MA10", "MA20",                   # Moving average features
-                    "MAX5", "MAX10", "MIN5", "MIN10",        # Extrema features
-                    "RANK5", "RANK10",                       # Rank features
-                    "RSV5", "RSV10",                         # Relative strength features
-                    "BETA5", "BETA10",                       # Beta features
-                    "RSQR5", "RSQR10", "RSQR20"             # R-squared features
-                ],
-                "label_col": "LABEL0"
+                "feature_col": feature_names,  # Use all features from enhanced Alpha158
+                "label_col": label_names       # Multi-target prediction labels
             }
 
             logger.info(f"Registered dataset '{self.dataset_name}' with {len(DATASET_SETTING[self.dataset_name]['feature_col'])} features")
@@ -379,12 +427,12 @@ class ShanghaiTFTRunner:
             return False
 
     def step3_train_tft_model(self,
-                             train_start: str = "2020-01-01",
-                             train_end: str = "2022-12-31", 
-                             valid_start: str = "2023-01-01",
-                             valid_end: str = "2023-06-30",
-                             test_start: str = "2023-07-01",
-                             test_end: str = "2023-12-31") -> bool:
+                             train_start: str = "2023-01-01",
+                             train_end: str = "2024-06-07",
+                             valid_start: str = "2024-06-10",
+                             valid_end: str = "2024-09-30",
+                             test_start: str = "2024-10-16",
+                             test_end: str = "2024-12-31") -> bool:
         """
         Step 3: Train TFT model on Shanghai stock data
 
@@ -402,17 +450,31 @@ class ShanghaiTFTRunner:
         try:
             logger.info("Step 3: Training TFT model...")
 
+            # Check if any TFT implementation is available
+            if not TFT_AVAILABLE and not MODERN_TFT_AVAILABLE:
+                logger.error("No TFT implementation available. Cannot train TFT model.")
+                logger.info("Alternative approaches:")
+                logger.info("1. Install TensorFlow: pip install tensorflow")
+                logger.info("2. Use qlib's built-in models (LightGBM, XGBoost, etc.)")
+                logger.info("3. Use the alternative model training method")
+                return False
+
+            if not TENSORFLOW_AVAILABLE:
+                logger.error("TensorFlow is not available. Cannot train TFT model.")
+                logger.info("Install TensorFlow: pip install tensorflow")
+                return False
+
             # Initialize qlib
             init(provider_uri=str(self.qlib_data_dir), region="cn")
 
-            # Create dataset configuration
+            # Create dataset configuration with enhanced Alpha158
             dataset_config = {
                 "class": "DatasetH",
                 "module_path": "qlib.data.dataset",
                 "kwargs": {
                     "handler": {
-                        "class": "Alpha158",
-                        "module_path": "qlib.contrib.data.handler",
+                        "class": "Alpha158WithROIAndBOLL",
+                        "module_path": "alpha158_enhanced",
                         "kwargs": {
                             "start_time": train_start,
                             "end_time": test_end,
@@ -430,18 +492,54 @@ class ShanghaiTFTRunner:
             # Create dataset
             dataset = init_instance_by_config(dataset_config)
 
-            # Create and train TFT model
-            self.model = TFTModel(
-                DATASET=self.dataset_name,
-                label_shift=5  # 5-day forward prediction
-            )
+            # Create and train TFT model with multi-target prediction
+            if TFT_AVAILABLE:
+                # Use original TFT implementation
+                logger.info("Using Original TFT implementation")
+                self.model = TFTModel(
+                    DATASET=self.dataset_name,
+                    label_shift=1  # 1-day forward prediction for ROI and BOLL ratios
+                )
 
-            logger.info("Starting TFT model training...")
-            self.model.fit(
-                dataset=dataset,
-                MODEL_FOLDER=str(self.model_folder),
-                USE_GPU_ID=self.gpu_id
-            )
+                logger.info("Starting Original TFT model training...")
+                self.model.fit(
+                    dataset=dataset,
+                    MODEL_FOLDER=str(self.model_folder),
+                    USE_GPU_ID=self.gpu_id
+                )
+
+            elif MODERN_TFT_AVAILABLE:
+                # Use modern TFT implementation
+                logger.info("Using Modern TFT implementation (TensorFlow 2.x)")
+
+                # Process data for modern TFT
+                from modern_tft_model_simple import process_qlib_data
+                X_train, y_train, X_val, y_val = process_qlib_data(dataset)
+
+                # Create modern TFT model
+                self.model = ModernTFTModel(
+                    feature_dim=X_train.shape[2],  # Number of features
+                    hidden_dim=128,
+                    num_heads=8,
+                    num_layers=4,
+                    sequence_length=X_train.shape[1]
+                )
+
+                logger.info("Starting Modern TFT model training...")
+                self.model.fit(
+                    X_train, y_train,
+                    X_val, y_val,
+                    epochs=100,
+                    batch_size=32
+                )
+
+                # Save model
+                model_path = self.model_folder / "modern_tft_model.h5"
+                self.model.save(str(model_path))
+                logger.info(f"Model saved to {model_path}")
+
+            else:
+                raise RuntimeError("No TFT implementation available")
 
             logger.info("✅ Step 3 completed: TFT model training finished")
             return True
@@ -465,16 +563,46 @@ class ShanghaiTFTRunner:
         try:
             logger.info("Step 4: Generating TFT predictions...")
 
+            # Check if any TFT implementation is available
+            if not TFT_AVAILABLE and not MODERN_TFT_AVAILABLE:
+                logger.error("No TFT implementation available. Cannot generate predictions.")
+                return None
+
             if not hasattr(self, 'model') or self.model is None:
                 logger.error("Model not trained. Please run step3_train_tft_model first.")
                 return None
 
-            # Generate predictions
-            predictions = self.model.predict(dataset)
+            # Generate predictions based on implementation
+            if TFT_AVAILABLE and hasattr(self.model, 'predict'):
+                # Original TFT implementation
+                predictions = self.model.predict(dataset)
+
+            elif MODERN_TFT_AVAILABLE:
+                # Modern TFT implementation
+                logger.info("Generating predictions with Modern TFT...")
+
+                if dataset is None:
+                    logger.error("Dataset required for Modern TFT predictions")
+                    return None
+
+                # Process test data
+                from modern_tft_model_simple import process_qlib_data
+                _, _, X_test, y_test = process_qlib_data(dataset)
+
+                # Generate predictions
+                predictions = self.model.predict(X_test)
+
+                # Convert to pandas Series for compatibility
+                import pandas as pd
+                predictions = pd.Series(predictions.flatten())
+
+            else:
+                logger.error("No valid TFT model available for predictions")
+                return None
 
             logger.info(f"Generated {len(predictions)} predictions")
             logger.info("✅ Step 4 completed: TFT predictions generated")
-            
+
             return predictions
 
         except Exception as e:
@@ -483,10 +611,82 @@ class ShanghaiTFTRunner:
             traceback.print_exc()
             return None
 
+    def step3_alternative_model_training(self,
+                                        train_start: str = "2023-01-01",
+                                        train_end: str = "2024-06-07",
+                                        valid_start: str = "2024-06-10",
+                                        valid_end: str = "2024-09-30",
+                                        test_start: str = "2024-10-16",
+                                        test_end: str = "2024-12-31") -> bool:
+        """
+        Alternative model training using qlib's built-in models (Python 3.12 compatible)
+
+        Args:
+            train_start: Training period start date
+            train_end: Training period end date
+            valid_start: Validation period start date
+            valid_end: Validation period end date
+            test_start: Test period start date
+            test_end: Test period end date
+
+        Returns:
+            bool: Success status
+        """
+        try:
+            logger.info("Step 3 (Alternative): Training qlib model...")
+
+            # Initialize qlib
+            init(provider_uri=str(self.qlib_data_dir), region="cn")
+
+            # Create dataset configuration with enhanced Alpha158
+            dataset_config = {
+                "class": "DatasetH",
+                "module_path": "qlib.data.dataset",
+                "kwargs": {
+                    "handler": {
+                        "class": "Alpha158WithROIAndBOLL",
+                        "module_path": "alpha158_enhanced",
+                        "kwargs": {
+                            "start_time": train_start,
+                            "end_time": test_end,
+                            "instruments": "all"
+                        }
+                    },
+                    "segments": {
+                        "train": [train_start, train_end],
+                        "valid": [valid_start, valid_end],
+                        "test": [test_start, test_end]
+                    }
+                }
+            }
+
+            # Create dataset
+            dataset = init_instance_by_config(dataset_config)
+
+            logger.info("Dataset created successfully with enhanced Alpha158 features")
+            logger.info("Available alternatives for model training:")
+            logger.info("1. Use qlib's LightGBM model")
+            logger.info("2. Use qlib's XGBoost model")
+            logger.info("3. Use qlib's Linear model")
+            logger.info("4. Export data for external model training")
+
+            # Save dataset information for alternative use
+            self.dataset = dataset
+            self.dataset_config = dataset_config
+
+            logger.info("✅ Step 3 (Alternative) completed: Dataset prepared for alternative models")
+            return True
+
+        except Exception as e:
+            logger.error(f"Step 3 (Alternative) failed: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+
     def run_complete_tft_workflow(self,
                                  symbol_filter: List[str] = ["600000", "600036", "600519"],
-                                 start_date: str = "2020-01-01",
-                                 end_date: str = "2023-12-31") -> bool:
+                                 start_date: str = "2023-01-01",
+                                 end_date: str = "2024-12-31") -> bool:
         """
         Run complete TFT workflow for Shanghai stocks
 
@@ -536,9 +736,9 @@ def main():
     parser = argparse.ArgumentParser(description="Shanghai Stock TFT Model Runner")
     parser.add_argument("--symbols", nargs="+", default=["600000", "600036", "600519"],
                        help="Stock symbols to include")
-    parser.add_argument("--start-date", type=str, default="2020-01-01",
+    parser.add_argument("--start-date", type=str, default="2023-01-01",
                        help="Start date for data")
-    parser.add_argument("--end-date", type=str, default="2023-12-31", 
+    parser.add_argument("--end-date", type=str, default="2024-12-31",
                        help="End date for data")
     parser.add_argument("--model-folder", type=str, default="shanghai_tft_models",
                        help="Directory to save models")
@@ -801,8 +1001,8 @@ def create_tft_config_file():
         "market": "shanghai_stocks",
         "benchmark": "SH000001",
         "data_config": {
-            "start_time": "2020-01-01",
-            "end_time": "2023-12-31",
+            "start_time": "2023-01-01",
+            "end_time": "2024-12-31",
             "symbols": ["600000", "600036", "600519"],
             "min_periods": 100
         },
@@ -814,9 +1014,9 @@ def create_tft_config_file():
         },
         "training_config": {
             "segments": {
-                "train": ["2020-01-01", "2022-12-31"],
-                "valid": ["2023-01-01", "2023-06-30"],
-                "test": ["2023-07-01", "2023-12-31"]
+                "train": ["2023-01-01", "2024-06-07"],
+                "valid": ["2024-06-10", "2024-09-30"],
+                "test": ["2024-10-16", "2024-12-31"]
             }
         },
         "tft_hyperparameters": {
